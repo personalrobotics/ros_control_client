@@ -1,0 +1,26 @@
+<?xml version="1.0"?>
+<package format="2">
+  <name>ros_control_client_py</name>
+  <version>0.0.0</version>
+  <description>Python library for interacting with ros_control controllers</description>
+
+  <maintainer email="cliddick@cmu.edu">Clint Liddick</maintainer>
+  <license>BSD</license>
+
+  <author email="mkoval@cs.cmu.edu">Mike Koval</author>
+
+  <buildtool_depend>catkin</buildtool_depend>
+
+  <depend>actionlib</depend>
+  <depend>catkin</depend>
+  <depend>control_msgs</depend>
+  <depend>controller_manager</depend>
+  <depend>numpy</depend>
+  <depend>openrave</depend>
+  <depend>rospy</depend>
+  <depend>sensor_msgs</depend>
+  <depend>trajectory_msgs</depend>
+
+  <export>
+  </export>
+</package>
