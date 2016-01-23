@@ -132,9 +132,11 @@ class FollowJointTrajectoryClient(object):
         """
         from actionlib import ActionClient
         from control_msgs.msg import FollowJointTrajectoryAction
+        from rospy import Duration
 
         self._client = ActionClient(ns, FollowJointTrajectoryAction)
-        self._client.wait_for_server()
+        if not self._client.wait_for_server(Duration(0.5)):
+            raise Exception('Could not connect to action server %s' % ns)
 
     def execute(self, traj_msg):
         """ Execute a JointTrajectory message and return a TrajectoryFuture.
