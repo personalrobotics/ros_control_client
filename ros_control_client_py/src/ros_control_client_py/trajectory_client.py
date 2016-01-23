@@ -124,7 +124,7 @@ class TrajectoryFuture(Future):
 
 
 class FollowJointTrajectoryClient(object):
-    def __init__(self, ns):
+    def __init__(self, ns, timeout=0.0):
         """ Constructs a client that executes JointTrajectory messages.
 
         @param ns: namespace for the FollowJointTrajectoryAction server
@@ -135,7 +135,7 @@ class FollowJointTrajectoryClient(object):
         from rospy import Duration
 
         self._client = ActionClient(ns, FollowJointTrajectoryAction)
-        if not self._client.wait_for_server(Duration(0.5)):
+        if not self._client.wait_for_server(Duration(timeout)):
             raise Exception('Could not connect to action server %s' % ns)
 
     def execute(self, traj_msg):
