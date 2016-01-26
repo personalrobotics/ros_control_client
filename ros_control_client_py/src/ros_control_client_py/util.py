@@ -16,13 +16,15 @@ def find_resource(relative_path, package):
                       relative_path))
 
 
-def or_to_ros_trajectory(robot, traj, time_tolerance=0.01):
+def or_to_ros_trajectory(robot, traj, dof_indices = None, time_tolerance=0.01):
     """ Convert an OpenRAVE trajectory to a ROS trajectory.
 
     @param robot: OpenRAVE robot
     @type  robot: openravepy.Robot
     @param traj: input trajectory
     @type  traj: openravepy.Trajectory
+    @param dof_indices: indices to convert
+    @type dof_indices: [int]
     @param time_tolerance: minimum time between two waypoints
     @type  time_tolerance: float
     """
@@ -37,7 +39,12 @@ def or_to_ros_trajectory(robot, traj, time_tolerance=0.01):
             'Robot and trajectory are not in the same environment.')
 
     cspec = traj.GetConfigurationSpecification()
-    dof_indices, _ = cspec.ExtractUsedIndices(robot)
+
+    if dof_indices == None:
+        dof_indices, _ = cspec.ExtractUsedIndices(robot)
+    else:
+        used_indices, _ = cspec.ExtractUsedIndices(robot)
+        dof_indices = list(set(used_indices) & set(dof_indices))
 
     traj_msg = JointTrajectory(
         joint_names=[ robot.GetJointFromDOFIndex(dof_index).GetName()
@@ -89,7 +96,6 @@ def or_to_ros_trajectory(robot, traj, time_tolerance=0.01):
 
     assert abs(time_from_start - traj.GetDuration()) < time_tolerance
     return traj_msg
-
 
 def pad_ros_trajectory(robot, traj_ros, joint_names):
     """ Add constant values for DOFs missing from a ROS trajectory.
