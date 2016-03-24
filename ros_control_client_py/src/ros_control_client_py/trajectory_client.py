@@ -146,7 +146,6 @@ class FollowJointTrajectoryClient(object):
         @return future representing the execution of the trajectory
         @rtype  TrajectoryFuture
         """
-        import rospy
         from control_msgs.msg import FollowJointTrajectoryGoal
 
         goal_msg = FollowJointTrajectoryGoal()
