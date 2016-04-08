@@ -15,7 +15,7 @@
   <depend>catkin</depend>
   <depend>control_msgs</depend>
   <depend>controller_manager</depend>
-  <depend>numpy</depend>
+  <depend>python-numpy</depend>
   <depend>openrave</depend>
   <depend>rospy</depend>
   <depend>sensor_msgs</depend>
