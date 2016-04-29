@@ -6,6 +6,7 @@ find_package(catkin REQUIRED COMPONENTS
   catkin
   control_msgs
   controller_manager
+  controller_manager_msgs
   rospy
   sensor_msgs
   trajectory_msgs

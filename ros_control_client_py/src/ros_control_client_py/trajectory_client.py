@@ -88,7 +88,7 @@ class TrajectoryFuture(Future):
         with self.lock:
             if not self._traj_executed.header.stamp:
                 self._traj_executed.header.stamp = (msg.header.stamp
-                                                  - actual.time_from_start)
+                                                  - msg.actual.time_from_start)
 
             self._traj_executed.points.append(msg.actual)
 
@@ -117,26 +117,32 @@ class TrajectoryFuture(Future):
                 self.set_exception(exception)
         # Goal was cancelled. Note that this could have been one by another
         # thread or process, so _cancelled may be False.
-        elif terminal_state in [TerminalState.PREEMPTED, TerminalState.RECALLED]:
+        elif terminal_state in [TerminalState.PREEMPTED,
+                                TerminalState.RECALLED,
+                                TerminalState.ABORTED]:
             self.set_cancelled()
         else:
             self.set_exception(exception)
 
 
 class FollowJointTrajectoryClient(object):
-    def __init__(self, ns, timeout=0.0):
+    def __init__(self, ns, controller_name, timeout=0.0):
         """ Constructs a client that executes JointTrajectory messages.
 
         @param ns: namespace for the FollowJointTrajectoryAction server
         @type  ns: str
+        @param controller_name: name of controller under ns
+        @type  controller_name: str
         """
         from actionlib import ActionClient
         from control_msgs.msg import FollowJointTrajectoryAction
         from rospy import Duration
 
-        self._client = ActionClient(ns, FollowJointTrajectoryAction)
+        as_name = ns + '/' + controller_name + '/follow_joint_trajectory'
+        self._client = ActionClient(as_name, FollowJointTrajectoryAction)
         if not self._client.wait_for_server(Duration(timeout)):
-            raise Exception('Could not connect to action server %s' % ns)
+            raise Exception('Could not connect to action server {}'.format(
+                as_name))
 
     def execute(self, traj_msg):
         """ Execute a JointTrajectory message and return a TrajectoryFuture.
@@ -146,7 +152,6 @@ class FollowJointTrajectoryClient(object):
         @return future representing the execution of the trajectory
         @rtype  TrajectoryFuture
         """
-        import rospy
         from control_msgs.msg import FollowJointTrajectoryGoal
 
         goal_msg = FollowJointTrajectoryGoal()
