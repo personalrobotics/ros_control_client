@@ -95,25 +95,22 @@ class ControllerSwitcher(object):
 
 
 class ControllerManagerClient(object):
-    def __init__(self, ns='', list_controllers_topic='/list_controllers',
-                              switch_controller_topic='/switch_controller'):
+    def __init__(self, ns=''):
         """ Constructs a client to a ros_control ControllerManager.
 
         @param ns: ROS namespace containing the ControllerManager
         @type  ns: str
-        @param list_controllers_topic: name of ListControllers topic
-        @type  list_controllers_topic: str
-        @param switch_controller_topic: name of SwitchController topic
-        @type  switch_controller_topic: str
         """
         from controller_manager_msgs.srv import (ListControllers,
                                                  SwitchController)
         from rospy import ServiceProxy
 
         self._list_controllers_srv = ServiceProxy(
-            ns + list_controllers_topic, ListControllers, persistent=True)
+            ns + '/controller_manager/list_controllers', ListControllers,
+            persistent=True)
         self._switch_controllers_srv = ServiceProxy(
-            ns + switch_controller_topic, SwitchController, persistent=True)
+            ns + '/controller_manager/switch_controller', SwitchController,
+            persistent=True)
 
     def request(self, *controller_names):
         """ Returns a ControllerSwitcher for the requested controllers.

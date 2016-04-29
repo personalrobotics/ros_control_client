@@ -1,3 +1,4 @@
+import logging
 from .futures import Future, FutureError
 
 
@@ -20,11 +21,9 @@ class SetPositionFuture(Future):
 
         from actionlib import CommState
         from copy import deepcopy
-        from sensor_msgs.msg import JointState
 
         self._prev_state = CommState.PENDING
         self._position_cmd = deepcopy(position_cmd)
-        # self._cmd_executed =
 
     def cancel(self):
         self._handle.cancel()
@@ -55,7 +54,6 @@ class SetPositionFuture(Future):
 
     def _on_done(self, terminal_state, result):
         from actionlib import TerminalState, get_name_of_constant
-        from copy import deepcopy
         from pr_control_msgs.msg import SetPositionActionResult
 
         exception = SetPositionFailed(
@@ -92,24 +90,28 @@ class SetPositionClient(object):
         from pr_control_msgs.msg import SetPositionAction
         from rospy import Duration
 
-        self._client = ActionClient(ns + '/' + controller_name, SetPositionAction)
+        self.log = logging.getLogger(__name__)
+        as_name = ns + '/' + controller_name + '/set_position'
+        self._client = ActionClient(as_name, SetPositionAction)
         if not self._client.wait_for_server(Duration(timeout)):
-            raise Exception('Could not connect to action server %s' % ns)
+            raise Exception('Could not connect to action server {}'.format(
+                as_name))
 
-    def execute(self, positional_joint_state):
+    def execute(self, joint_state):
         """Execute a SetPosition action and return a SetPositionFuture
 
         @param  positional_joint_state: requested position
-        @type   positional_joint_state: sensor_msgs.msg.JointState
+        @type   positional_joint_state: sensor_msgs.JointState
         @return future pending on the completion of the action
         @type   SetPositionFuture
         """
-        from pr_control_msgs.msg import SetPositionActionGoal
+        from pr_control_msgs.msg import SetPositionGoal
 
-        goal_msg = SetPositionActionGoal()
-        goal_msg.command = positional_joint_state
+        goal_msg = SetPositionGoal()
+        goal_msg.command = joint_state
 
-        action_future = SetPositionFuture(positional_joint_state)
+        self.log.info('Sending SetPositionGoal: {}'.format(goal_msg))
+        action_future = SetPositionFuture(joint_state)
         action_future._handle = self._client.send_goal(
             goal_msg,
             transition_cb=action_future.on_transition,

@@ -80,8 +80,7 @@ class TriggerClient(object):
         from pr_control_msgs.msg import TriggerAction
         from rospy import Duration
 
-        self._client = ActionClient(ns + '/' + controller_name + '/trigger',
-                                    TriggerAction)
+        self._client = ActionClient(ns + '/' + controller_name, TriggerAction)
         if not self._client.wait_for_server(Duration(timeout)):
             raise Exception('Could not connect to action server %s' % ns)
 
