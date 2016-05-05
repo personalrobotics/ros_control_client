@@ -41,11 +41,9 @@ class ControllerSwitcher(object):
         controller_infos = controller_infos_msg.controller
 
         # Figure out what resources the requested controllers need.
-        required_resources = set(sum([
-            controller_info.resources
-            for controller_info in controller_infos
-            if controller_info.name in self._requested_controllers
-        ], []))
+        required_resources = self._required_resource_set_from_ctrl_info_msg(
+            controller_infos_msg,
+            lambda x: x.name in self._requested_controllers)
 
         # Start any of the requested controllers that are not already running.
         start_controllers = [
@@ -61,7 +59,9 @@ class ControllerSwitcher(object):
             for controller_info in controller_infos
             if controller_info.name not in self._requested_controllers
             if controller_info.state == 'running'
-            if not required_resources.isdisjoint(controller_info.resources)
+            if not required_resources.isdisjoint(
+                    [r for cr in controller_info.claimed_resources
+                     for r in cr.resources])
         ]
 
         ok = self._mode_switcher._switch_controllers_srv(
@@ -93,6 +93,19 @@ class ControllerSwitcher(object):
         if not ok:
             raise SwitchError('Reverting controllers failed.')
 
+    def _required_resource_set_from_ctrl_info_msg(self, msg, filter_fn=None):
+        # filter_fn = lambda ctrl: ctrl.name in self._requested_controllers
+        controller_infos = msg.controller
+        requested_controller_states = filter(filter_fn, controller_infos)
+        claimed_resource_lists = [ctrl.claimed_resources for
+                             ctrl in requested_controller_states]
+        claimed_resources = [cr for crl in claimed_resource_lists
+                             for cr in crl]
+        resource_lists = [cr.resources for cr in claimed_resources]
+        resources = [s for s in resource_lists]
+        required_resources = set(sum(resources, []))
+        return required_resources
+
 
 class ControllerManagerClient(object):
     def __init__(self, ns=''):
@@ -112,7 +125,7 @@ class ControllerManagerClient(object):
             ns + '/controller_manager/switch_controller', SwitchController,
             persistent=True)
 
-    def request(self, *controller_names):
+    def request(self, controller_names):
         """ Returns a ControllerSwitcher for the requested controllers.
 
         @param controller_names: list of controller names to request

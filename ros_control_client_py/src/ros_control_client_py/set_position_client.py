@@ -1,4 +1,5 @@
 import logging
+import rospy
 from .futures import Future, FutureError
 
 
@@ -88,12 +89,11 @@ class SetPositionClient(object):
 
         from actionlib import ActionClient
         from pr_control_msgs.msg import SetPositionAction
-        from rospy import Duration
 
         self.log = logging.getLogger(__name__)
         as_name = ns + '/' + controller_name + '/set_position'
         self._client = ActionClient(as_name, SetPositionAction)
-        if not self._client.wait_for_server(Duration(timeout)):
+        if not self._client.wait_for_server(rospy.Duration(timeout)):
             raise Exception('Could not connect to action server {}'.format(
                 as_name))
 
@@ -108,7 +108,8 @@ class SetPositionClient(object):
         from pr_control_msgs.msg import SetPositionGoal
 
         goal_msg = SetPositionGoal()
-        goal_msg.command = joint_state
+        goal_msg.command.header.stamp = rospy.Time.now()
+        goal_msg.command.position = joint_state
 
         self.log.info('Sending SetPositionGoal: {}'.format(goal_msg))
         action_future = SetPositionFuture(joint_state)

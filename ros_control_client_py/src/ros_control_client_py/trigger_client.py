@@ -2,11 +2,8 @@ from .futures import Future, FutureError
 
 
 class TriggerFailed(FutureError):
-    def __init__(self, message, requested, executed):
+    def __init__(self, message):
         super(TriggerFailed, self).__init__(message)
-
-        self.requested = requested
-        self.executed = executed
 
 
 class TriggerFuture(Future):
