@@ -7,6 +7,7 @@ find_package(catkin REQUIRED COMPONENTS
   control_msgs
   controller_manager
   controller_manager_msgs
+  pr_control_msgs
   rospy
   sensor_msgs
   trajectory_msgs
@@ -16,4 +17,5 @@ find_package(
   openrave
 )
 
+catkin_package()
 catkin_python_setup()

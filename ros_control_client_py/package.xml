@@ -17,6 +17,7 @@
   <depend>controller_manager</depend>
   <depend>controller_manager_msgs</depend>
   <depend>openrave</depend>
+  <depend>pr_control_msgs</depend>
   <depend>python-numpy</depend>
   <depend>rospy</depend>
   <depend>sensor_msgs</depend>
