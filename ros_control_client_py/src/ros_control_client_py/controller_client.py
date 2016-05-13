@@ -1,3 +1,5 @@
+from controller_manager_msgs.srv import SwitchControllerRequest
+
 class ROSControlError(Exception):
     pass
 
@@ -21,7 +23,7 @@ class ControllerSwitcher(object):
         self._stopped_controllers = None
 
     def __enter__(self):
-        self._started_controllers, self._stopped_controllers = self.switch()
+        self.switch()
 
     def __exit__(self, type, value, tb):
         self.unswitch()
@@ -35,7 +37,6 @@ class ControllerSwitcher(object):
         @return tuple containing the loaded and unloaded controllers
         @rtype  [str], [str]
         """
-        from controller_manager_msgs.srv import SwitchControllerRequest
 
         controller_infos_msg = self._mode_switcher._list_controllers_srv()
         controller_infos = controller_infos_msg.controller
@@ -69,7 +70,10 @@ class ControllerSwitcher(object):
             stop_controllers=stop_controllers,
             strictness=SwitchControllerRequest.STRICT
         )
+
         if ok:
+            self._started_controllers = start_controllers
+            self._stopped_controllers = stop_controllers
             return start_controllers, stop_controllers
         else:
             raise SwitchError('Switching controllers failed.')

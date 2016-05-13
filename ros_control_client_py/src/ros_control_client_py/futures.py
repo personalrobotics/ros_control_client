@@ -114,13 +114,13 @@ class Future(object):
         """
         with self.lock:
             if self._is_done:
+                do_call = True
+            else:
                 if fn in self._callbacks:
                     raise ValueError('Callback is already registered.')
 
                 self._callbacks.append(fn)
                 do_call = False
-            else:
-                do_call = True
 
         if do_call:
             fn(self)
