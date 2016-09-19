@@ -77,20 +77,18 @@ class TrajectoryFuture(Future):
 
         self._prev_state = state
 
-    def on_feedback(self, feedback_msg):
+    def on_feedback(self, handle, result):
         """ Feedback callback for the FollowJointTrajectoryAction client.
 
         @param msg: feedback message
         @type msg: control_msgs.msg.FollowJointTrajectoryFeedback
         """
-        msg = feedback_msg.feedback
-
         with self.lock:
             if not self._traj_executed.header.stamp:
-                self._traj_executed.header.stamp = (msg.header.stamp
-                                                  - msg.actual.time_from_start)
+                self._traj_executed.header.stamp = (result.header.stamp
+                                                  - result.actual.time_from_start)
 
-            self._traj_executed.points.append(msg.actual)
+            self._traj_executed.points.append(result.actual)
 
     def _on_done(self, terminal_state, result):
         from actionlib import TerminalState, get_name_of_constant
